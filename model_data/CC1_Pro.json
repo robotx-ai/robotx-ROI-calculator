@@ -1,0 +1,7 @@
+{
+  "model_id": "CC1_Pro",
+  "robot_model": "CC1 Pro",
+  "robot_msrp_usd": 27000,
+  "maintenance_cost_per_year_usd": 2000,
+  "robot_cleaning_rate_sqft_per_hour": 7500
+}
