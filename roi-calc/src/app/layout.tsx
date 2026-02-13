@@ -15,7 +15,10 @@ import { CssBaseline } from '@mui/material';
 import Link from 'next/link';
 
 export const metadata: Metadata = {
-  title: 'ROI Calculator',
+  title: 'RobotX ROI Calculator',
+  icons: {
+    icon: '/favicon.ico',
+  },
 };
 
 export default function RootLayout({
