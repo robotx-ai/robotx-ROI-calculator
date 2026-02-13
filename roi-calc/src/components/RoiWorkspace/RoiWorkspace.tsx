@@ -1,9 +1,10 @@
 'use client';
 import { LaborCostWidget } from '@/components/LaborCostWidget';
+import { RoiLanguageSwitcher } from '@/components/RoiLocale';
 import { RobotMaintenanceCostWidget } from '@/components/RobotMaintenanceCostWidget';
 import { RobotMetricsPanel } from '@/components/RobotMetricsPanel';
 import { RoiAnalysisWidget } from '@/components/RoiAnalysisWidget';
-import { Box } from '@mui/material';
+import { Box, Typography } from '@mui/material';
 import React from 'react';
 
 type ModelData = {
@@ -57,41 +58,64 @@ function RoiWorkspace({ modelData, priceData }: RoiWorkspaceProps) {
     <Box
       sx={{
         display: 'grid',
-        gap: 3,
-        gridTemplateColumns: { xs: '1fr', lg: '560px 560px' },
-        justifyContent: 'start',
+        gap: 2.5,
+        width: '100%',
+        maxWidth: 1120,
+        mx: 'auto',
       }}
     >
-      <Box sx={{ width: '100%', maxWidth: 560 }}>
-        <RobotMetricsPanel modelData={modelData} />
+      <Box
+        sx={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          gap: 2,
+        }}
+      >
+        <Typography variant='h4' sx={{ fontWeight: 600, lineHeight: 1.2 }}>
+          ROI Calculator
+        </Typography>
+        <RoiLanguageSwitcher />
       </Box>
 
-      <Box sx={{ width: '100%', maxWidth: 560 }}>
-        <LaborCostWidget
-          priceData={priceData}
-          onCostPerYearChange={setManualCostPerYear}
-        />
-      </Box>
+      <Box
+        sx={{
+          display: 'grid',
+          gap: 3,
+          gridTemplateColumns: { xs: 'minmax(0, 1fr)', lg: 'repeat(2, minmax(0, 1fr))' },
+        }}
+      >
+        <Box sx={{ width: '100%' }}>
+          <RobotMetricsPanel modelData={modelData} />
+        </Box>
 
-      <Box sx={{ width: '100%', maxWidth: 560 }}>
-        <RobotMaintenanceCostWidget
-          panelHeight={BOTTOM_PANEL_HEIGHT}
-          onChange={({ costPerYear, workingDays }) => {
-            setRobotLaborCostPerYear(costPerYear);
-            setWorkingDaysPerYear(workingDays);
-          }}
-        />
-      </Box>
+        <Box sx={{ width: '100%' }}>
+          <LaborCostWidget
+            priceData={priceData}
+            onCostPerYearChange={setManualCostPerYear}
+          />
+        </Box>
 
-      <Box sx={{ width: '100%', maxWidth: 560 }}>
-        <RoiAnalysisWidget
-          panelHeight={BOTTOM_PANEL_HEIGHT}
-          purchasePrice={modelData.robot_msrp_usd}
-          annualMaintenanceCost={modelData.maintenance_cost_per_year_usd}
-          manualCostPerYear={manualCostPerYear}
-          robotLaborCostPerYear={robotLaborCostPerYear}
-          workingDaysPerYear={workingDaysPerYear}
-        />
+        <Box sx={{ width: '100%' }}>
+          <RobotMaintenanceCostWidget
+            panelHeight={BOTTOM_PANEL_HEIGHT}
+            onChange={({ costPerYear, workingDays }) => {
+              setRobotLaborCostPerYear(costPerYear);
+              setWorkingDaysPerYear(workingDays);
+            }}
+          />
+        </Box>
+
+        <Box sx={{ width: '100%' }}>
+          <RoiAnalysisWidget
+            panelHeight={BOTTOM_PANEL_HEIGHT}
+            purchasePrice={modelData.robot_msrp_usd}
+            annualMaintenanceCost={modelData.maintenance_cost_per_year_usd}
+            manualCostPerYear={manualCostPerYear}
+            robotLaborCostPerYear={robotLaborCostPerYear}
+            workingDaysPerYear={workingDaysPerYear}
+          />
+        </Box>
       </Box>
     </Box>
   );

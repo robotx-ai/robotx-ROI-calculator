@@ -2,6 +2,7 @@ import { AppRouterCacheProvider } from '@mui/material-nextjs/v14-appRouter';
 import type { Metadata } from 'next';
 
 import { AppSnackbar } from '@/components/AppSnackbar';
+import { RoiLocaleProvider } from '@/components/RoiLocale';
 import { CONFIG } from '@/config';
 import '@/styles/style.css';
 import '@assets/fonts/noir-pro/styles.css';
@@ -31,15 +32,17 @@ export default function RootLayout({
       <body>
         <div id='root'>
           <AppRouterCacheProvider>
-            <JumboConfigProvider LinkComponent={Link}>
-              <JumboTheme init={CONFIG.THEME}>
-                <CssBaseline />
-                <JumboDialogProvider>
-                  <JumboDialog />
-                  <AppSnackbar>{children}</AppSnackbar>
-                </JumboDialogProvider>
-              </JumboTheme>
-            </JumboConfigProvider>
+            <RoiLocaleProvider>
+              <JumboConfigProvider LinkComponent={Link}>
+                <JumboTheme init={CONFIG.THEME}>
+                  <CssBaseline />
+                  <JumboDialogProvider>
+                    <JumboDialog />
+                    <AppSnackbar>{children}</AppSnackbar>
+                  </JumboDialogProvider>
+                </JumboTheme>
+              </JumboConfigProvider>
+            </RoiLocaleProvider>
           </AppRouterCacheProvider>
         </div>
       </body>

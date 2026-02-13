@@ -1,4 +1,5 @@
 'use client';
+import { useRoiLocale } from '@/components/RoiLocale';
 import { RoiMetricCard } from '@/components/RoiMetricCard';
 import BuildCircleOutlinedIcon from '@mui/icons-material/BuildCircleOutlined';
 import CleaningServicesOutlinedIcon from '@mui/icons-material/CleaningServicesOutlined';
@@ -24,18 +25,6 @@ type CleaningRateUnit = 'hour' | 'day';
 
 const DAILY_OPERATING_HOURS = 7;
 
-const formatUsd = (value: number) =>
-  new Intl.NumberFormat('en-US', {
-    style: 'currency',
-    currency: 'USD',
-    maximumFractionDigits: 2,
-  }).format(value);
-
-const formatNumber = (value: number) =>
-  new Intl.NumberFormat('en-US', {
-    maximumFractionDigits: 0,
-  }).format(value);
-
 const CARD_COLORS = {
   model: '#83868f',
   msrp: '#82948b',
@@ -51,6 +40,8 @@ const CARD_COLORS = {
 } as const;
 
 function RobotMetricsPanel({ modelData }: RobotMetricsPanelProps) {
+  const { locale } = useRoiLocale();
+  const isZh = locale === 'zh-CN';
   const [maintenanceUnitIndex, setMaintenanceUnitIndex] = React.useState(0);
   const [cleaningRateUnitIndex, setCleaningRateUnitIndex] = React.useState(0);
 
@@ -79,6 +70,46 @@ function RobotMetricsPanel({ modelData }: RobotMetricsPanelProps) {
     setCleaningRateUnitIndex((prev) => (prev + 1) % cleaningRateUnits.length);
   };
 
+  const formatUsd = React.useCallback(
+    (value: number) =>
+      new Intl.NumberFormat(locale, {
+        style: 'currency',
+        currency: 'USD',
+        maximumFractionDigits: 2,
+      }).format(value),
+    [locale]
+  );
+
+  const formatNumber = React.useCallback(
+    (value: number) =>
+      new Intl.NumberFormat(locale, {
+        maximumFractionDigits: 0,
+      }).format(value),
+    [locale]
+  );
+
+  const maintenanceUnitLabel = isZh
+    ? {
+        year: '年',
+        month: '月',
+        week: '周',
+      }
+    : {
+        year: 'year',
+        month: 'month',
+        week: 'week',
+      };
+
+  const cleaningRateUnitLabel = isZh
+    ? {
+        hour: '小时',
+        day: '天',
+      }
+    : {
+        hour: 'hour',
+        day: 'day',
+      };
+
   return (
     <Box
       sx={{
@@ -93,7 +124,7 @@ function RobotMetricsPanel({ modelData }: RobotMetricsPanelProps) {
         <RoiMetricCard
           bgColor={CARD_COLORS.model}
           value={modelData.robot_model}
-          label='Robot Model'
+          label={isZh ? '机器人型号' : 'Robot Model'}
           Icon={SmartToyOutlinedIcon}
           rightOverlayImage='/assets/images/CC1.webp'
           rightOverlayAlpha={0.5}
@@ -106,7 +137,7 @@ function RobotMetricsPanel({ modelData }: RobotMetricsPanelProps) {
         <RoiMetricCard
           bgColor={CARD_COLORS.msrp}
           value={formatUsd(modelData.robot_msrp_usd)}
-          label='MSRP (USD)'
+          label={isZh ? '建议零售价 (USD)' : 'MSRP (USD)'}
           Icon={PaidOutlinedIcon}
           fullHeight={true}
         />
@@ -115,7 +146,9 @@ function RobotMetricsPanel({ modelData }: RobotMetricsPanelProps) {
         <RoiMetricCard
           bgColor={CARD_COLORS.maintenanceByUnit[maintenanceUnit]}
           value={formatUsd(maintenanceValueByUnit[maintenanceUnit])}
-          label={`Maintenance / ${maintenanceUnit}`}
+          label={`${isZh ? '维护成本' : 'Maintenance'} / ${
+            maintenanceUnitLabel[maintenanceUnit]
+          }`}
           Icon={BuildCircleOutlinedIcon}
           onClick={cycleMaintenanceUnit}
           fullHeight={true}
@@ -125,7 +158,9 @@ function RobotMetricsPanel({ modelData }: RobotMetricsPanelProps) {
         <RoiMetricCard
           bgColor={CARD_COLORS.cleaningByUnit[cleaningRateUnit]}
           value={formatNumber(cleaningRateValueByUnit[cleaningRateUnit])}
-          label={`sq ft/${cleaningRateUnit}`}
+          label={`${isZh ? '平方英尺' : 'sq ft'}/${
+            cleaningRateUnitLabel[cleaningRateUnit]
+          }`}
           Icon={CleaningServicesOutlinedIcon}
           onClick={cycleCleaningRateUnit}
           fullHeight={true}

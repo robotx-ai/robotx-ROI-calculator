@@ -1,4 +1,5 @@
 'use client';
+import { useRoiLocale } from '@/components/RoiLocale';
 import { Div } from '@jumbo/shared';
 import { Card, CardHeader, Stack, Typography } from '@mui/material';
 import { styled } from '@mui/material/styles';
@@ -33,28 +34,6 @@ export const ROI_ANALYSIS_COLORS = {
   tooltipBg: 'rgba(0, 0, 0, 0.86)',
 } as const;
 
-const formatCurrency = (value: number) =>
-  new Intl.NumberFormat('en-US', {
-    style: 'currency',
-    currency: 'USD',
-    maximumFractionDigits: 2,
-  }).format(value);
-
-const formatCurrencyRounded = (value: number) =>
-  new Intl.NumberFormat('en-US', {
-    style: 'currency',
-    currency: 'USD',
-    maximumFractionDigits: 0,
-  }).format(value);
-
-const formatCompactCurrency = (value: number) =>
-  new Intl.NumberFormat('en-US', {
-    notation: 'compact',
-    style: 'currency',
-    currency: 'USD',
-    maximumFractionDigits: 1,
-  }).format(value);
-
 const MetricItem = styled('div')(({ theme }) => ({
   color: theme.palette.common.white,
   width: '20%',
@@ -76,6 +55,8 @@ function RoiAnalysisWidget({
   workingDaysPerYear,
   panelHeight = 430,
 }: RoiAnalysisWidgetProps) {
+  const { locale } = useRoiLocale();
+  const isZh = locale === 'zh-CN';
   const annualSavings = manualCostPerYear - robotLaborCostPerYear;
   const dailySavings = annualSavings / workingDaysPerYear;
   const paybackMonths =
@@ -101,25 +82,84 @@ function RoiAnalysisWidget({
     [annualMaintenanceCost, manualCostPerYear, purchasePrice, robotLaborCostPerYear]
   );
 
+  const formatCurrency = React.useCallback(
+    (value: number) =>
+      new Intl.NumberFormat(locale, {
+        style: 'currency',
+        currency: 'USD',
+        maximumFractionDigits: 2,
+      }).format(value),
+    [locale]
+  );
+
+  const formatCurrencyRounded = React.useCallback(
+    (value: number) =>
+      new Intl.NumberFormat(locale, {
+        style: 'currency',
+        currency: 'USD',
+        maximumFractionDigits: 0,
+      }).format(value),
+    [locale]
+  );
+
+  const formatCompactCurrency = React.useCallback(
+    (value: number) =>
+      new Intl.NumberFormat(locale, {
+        notation: 'compact',
+        style: 'currency',
+        currency: 'USD',
+        maximumFractionDigits: 1,
+      }).format(value),
+    [locale]
+  );
+
+  const text = isZh
+    ? {
+        title: 'ROI 分析',
+        dailySavings: '日节省',
+        annualSavings: '年节省',
+        paybackPeriod: '回本周期（月）',
+        firstYearRoi: '首年 ROI',
+        fiveYearNetBenefit: '5 年净收益',
+        monthAxis: '月份',
+        monthLabel: '月份',
+        manualCostLine: '传统人工成本',
+        robotCostLine: '机器人成本',
+        na: '不适用',
+      }
+    : {
+        title: 'ROI Analysis',
+        dailySavings: 'Daily Savings',
+        annualSavings: 'Annual Savings',
+        paybackPeriod: 'Payback Period (Months)',
+        firstYearRoi: 'First-Year ROI',
+        fiveYearNetBenefit: '5-Year Net Benefit',
+        monthAxis: 'Month',
+        monthLabel: 'Month',
+        manualCostLine: 'Traditional Manual Cost',
+        robotCostLine: 'Robot Cost',
+        na: 'N/A',
+      };
+
   const metricItems = [
     {
-      label: 'Daily Savings',
+      label: text.dailySavings,
       value: formatCurrencyRounded(dailySavings),
     },
     {
-      label: 'Annual Savings',
+      label: text.annualSavings,
       value: formatCurrencyRounded(annualSavings),
     },
     {
-      label: 'Payback Period (Months)',
-      value: paybackMonths === null ? 'N/A' : paybackMonths.toFixed(2),
+      label: text.paybackPeriod,
+      value: paybackMonths === null ? text.na : paybackMonths.toFixed(2),
     },
     {
-      label: 'First-Year ROI',
+      label: text.firstYearRoi,
       value: `${firstYearROI.toFixed(2)}%`,
     },
     {
-      label: '5-Year Net Benefit',
+      label: text.fiveYearNetBenefit,
       value: formatCurrencyRounded(fiveYearNetBenefit),
     },
   ];
@@ -143,7 +183,7 @@ function RoiAnalysisWidget({
           sx={{ px: 3, py: 2 }}
           title={
             <Typography variant='h5' color='common.white'>
-              ROI Analysis
+              {text.title}
             </Typography>
           }
         />
@@ -167,7 +207,8 @@ function RoiAnalysisWidget({
       </Div>
 
       <Div sx={{ p: 2, flex: 1, minHeight: 0 }}>
-        <ResponsiveContainer height='100%'>
+        <Div sx={{ width: '100%', height: { xs: 260, lg: '100%' } }}>
+          <ResponsiveContainer width='100%' height='100%'>
           <LineChart
             data={chartData}
             margin={{ top: 10, right: 12, left: 0, bottom: 0 }}
@@ -181,7 +222,11 @@ function RoiAnalysisWidget({
               dataKey='month'
               axisLine={false}
               tickLine={false}
-              label={{ value: 'Month', position: 'insideBottomRight', offset: -5 }}
+              label={{
+                value: text.monthAxis,
+                position: 'insideBottomRight',
+                offset: -5,
+              }}
             />
             <YAxis
               axisLine={false}
@@ -190,7 +235,7 @@ function RoiAnalysisWidget({
             />
             <Tooltip
               formatter={(value: number) => formatCurrency(value)}
-              labelFormatter={(label) => `Month ${label}`}
+              labelFormatter={(label) => `${text.monthLabel} ${label}`}
               wrapperStyle={{
                 background: ROI_ANALYSIS_COLORS.tooltipBg,
                 borderRadius: 6,
@@ -206,7 +251,7 @@ function RoiAnalysisWidget({
               stroke={ROI_ANALYSIS_COLORS.manualLine}
               strokeWidth={2.5}
               dot={false}
-              name='Traditional Manual Cost'
+              name={text.manualCostLine}
             />
             <Line
               type='monotone'
@@ -214,10 +259,11 @@ function RoiAnalysisWidget({
               stroke={ROI_ANALYSIS_COLORS.robotLine}
               strokeWidth={2.5}
               dot={false}
-              name='Robot Cost'
+              name={text.robotCostLine}
             />
           </LineChart>
-        </ResponsiveContainer>
+          </ResponsiveContainer>
+        </Div>
       </Div>
     </Card>
   );

@@ -1,5 +1,6 @@
 'use client';
 import { JumboCard } from '@jumbo/components';
+import { useRoiLocale } from '@/components/RoiLocale';
 import { TabContext, TabList, TabPanel } from '@mui/lab';
 import {
   Box,
@@ -35,14 +36,9 @@ interface LaborCostWidgetProps {
   onCostPerYearChange?: (value: number) => void;
 }
 
-const formatCurrency = (value: number) =>
-  new Intl.NumberFormat('en-US', {
-    style: 'currency',
-    currency: 'USD',
-    maximumFractionDigits: 2,
-  }).format(value);
-
 function LaborCostWidget({ priceData, onCostPerYearChange }: LaborCostWidgetProps) {
+  const { locale } = useRoiLocale();
+  const isZh = locale === 'zh-CN';
   const [tabValue, setTabValue] = React.useState('area');
 
   const [hourlyCost, setHourlyCost] = React.useState(
@@ -87,9 +83,65 @@ function LaborCostWidget({ priceData, onCostPerYearChange }: LaborCostWidgetProp
     onCostPerYearChange?.(activeCostPerYear);
   }, [activeCostPerYear, onCostPerYearChange]);
 
+  const formatLocalizedCurrency = React.useCallback(
+    (value: number) =>
+      new Intl.NumberFormat(locale, {
+        style: 'currency',
+        currency: 'USD',
+        maximumFractionDigits: 2,
+      }).format(value),
+    [locale]
+  );
+
+  const text = isZh
+    ? {
+        title: '人工清洁成本输入',
+        tabArea: '按面积',
+        tabHourly: '按小时',
+        tabCustom: '自定义',
+        hourlyCost: '小时成本',
+        perHour: '/ 小时',
+        range: '范围',
+        hourPerDay: '每天工时',
+        hourUnit: '小时',
+        cleaningFrequencyPerMonth: '每月清洁频次',
+        areaCost: '面积成本',
+        perSqft: '/ 平方英尺',
+        cleaningArea: '清洁面积（平方英尺）',
+        costPerCleaning: '每次清洁费用',
+        frequency: '频次',
+        unit: '单位',
+        timesPerWeek: '次 / 周',
+        timesPerMonth: '次 / 月',
+        timesPerYear: '次 / 年',
+        costPerYear: '年成本',
+      }
+    : {
+        title: 'Labor Cost Input',
+        tabArea: 'Area Cost',
+        tabHourly: 'Hourly Cost',
+        tabCustom: 'Custom Cost',
+        hourlyCost: 'Hourly Cost',
+        perHour: '/ hour',
+        range: 'Range',
+        hourPerDay: 'Hour per day',
+        hourUnit: 'Hr',
+        cleaningFrequencyPerMonth: 'Cleaning frequency / month',
+        areaCost: 'Area Cost',
+        perSqft: '/ sq ft',
+        cleaningArea: 'Cleaning Area (sq ft)',
+        costPerCleaning: 'Cost per cleaning',
+        frequency: 'Frequency',
+        unit: 'Unit',
+        timesPerWeek: 'Times / Week',
+        timesPerMonth: 'Times / Month',
+        timesPerYear: 'Times / Year',
+        costPerYear: 'Cost / Year',
+      };
+
   return (
     <JumboCard
-      title={'Labor Cost Input'}
+      title={text.title}
       sx={{
         display: 'flex',
         flexDirection: 'column',
@@ -103,9 +155,9 @@ function LaborCostWidget({ priceData, onCostPerYearChange }: LaborCostWidgetProp
             sx={{ borderBottom: 1, borderColor: 'divider' }}
             onChange={(event, nextValue) => setTabValue(nextValue)}
           >
-            <Tab label={'Area Cost'} value={'area'} sx={{ flex: '1 1 auto' }} />
-            <Tab label={'Hourly cost'} value={'hourly'} sx={{ flex: '1 1 auto' }} />
-            <Tab label={'Custom Cost'} value={'custom'} sx={{ flex: '1 1 auto' }} />
+            <Tab label={text.tabArea} value={'area'} sx={{ flex: '1 1 auto' }} />
+            <Tab label={text.tabHourly} value={'hourly'} sx={{ flex: '1 1 auto' }} />
+            <Tab label={text.tabCustom} value={'custom'} sx={{ flex: '1 1 auto' }} />
           </TabList>
 
           <Box sx={{ flex: 1, minHeight: 0 }}>
@@ -113,7 +165,7 @@ function LaborCostWidget({ priceData, onCostPerYearChange }: LaborCostWidgetProp
               <Box sx={{ display: 'grid', gap: 2.5 }}>
                 <Box>
                   <Typography variant='body2' mb={1}>
-                    Hourly Cost: {formatCurrency(hourlyCost)} / hour
+                    {text.hourlyCost}: {formatLocalizedCurrency(hourlyCost)} {text.perHour}
                   </Typography>
                   <Slider
                     value={hourlyCost}
@@ -125,13 +177,14 @@ function LaborCostWidget({ priceData, onCostPerYearChange }: LaborCostWidgetProp
                     }
                   />
                   <Typography variant='caption' color='text.secondary'>
-                    Range: {formatCurrency(priceData.price_per_hour.lowest)} -{' '}
-                    {formatCurrency(priceData.price_per_hour.highest)}
+                    {text.range}:{' '}
+                    {formatLocalizedCurrency(priceData.price_per_hour.lowest)} -{' '}
+                    {formatLocalizedCurrency(priceData.price_per_hour.highest)}
                   </Typography>
                 </Box>
                 <Box>
                   <Typography variant='body2' mb={1}>
-                    Hour per day: {hourPerDay} Hr
+                    {text.hourPerDay}: {hourPerDay} {text.hourUnit}
                   </Typography>
                   <Slider
                     value={hourPerDay}
@@ -145,7 +198,7 @@ function LaborCostWidget({ priceData, onCostPerYearChange }: LaborCostWidgetProp
                 </Box>
                 <Box>
                   <Typography variant='body2' mb={1}>
-                    Cleaning frequency / month: {hourlyFrequencyPerMonth}
+                    {text.cleaningFrequencyPerMonth}: {hourlyFrequencyPerMonth}
                   </Typography>
                   <Slider
                     value={hourlyFrequencyPerMonth}
@@ -166,7 +219,7 @@ function LaborCostWidget({ priceData, onCostPerYearChange }: LaborCostWidgetProp
               <Box sx={{ display: 'grid', gap: 2.5 }}>
                 <Box>
                   <Typography variant='body2' mb={1}>
-                    Area Cost: {formatCurrency(areaCost)} / sq ft
+                    {text.areaCost}: {formatLocalizedCurrency(areaCost)} {text.perSqft}
                   </Typography>
                   <Slider
                     value={areaCost}
@@ -178,12 +231,13 @@ function LaborCostWidget({ priceData, onCostPerYearChange }: LaborCostWidgetProp
                     }
                   />
                   <Typography variant='caption' color='text.secondary'>
-                    Range: {formatCurrency(priceData.price_per_sqft.lowest)} -{' '}
-                    {formatCurrency(priceData.price_per_sqft.highest)}
+                    {text.range}:{' '}
+                    {formatLocalizedCurrency(priceData.price_per_sqft.lowest)} -{' '}
+                    {formatLocalizedCurrency(priceData.price_per_sqft.highest)}
                   </Typography>
                 </Box>
                 <TextField
-                  label='Cleaning Area (sq ft)'
+                  label={text.cleaningArea}
                   type='number'
                   value={cleaningArea}
                   onChange={(event) =>
@@ -192,7 +246,7 @@ function LaborCostWidget({ priceData, onCostPerYearChange }: LaborCostWidgetProp
                 />
                 <Box>
                   <Typography variant='body2' mb={1}>
-                    Cleaning frequency / month: {areaFrequencyPerMonth}
+                    {text.cleaningFrequencyPerMonth}: {areaFrequencyPerMonth}
                   </Typography>
                   <Slider
                     value={areaFrequencyPerMonth}
@@ -212,7 +266,7 @@ function LaborCostWidget({ priceData, onCostPerYearChange }: LaborCostWidgetProp
             <TabPanel value='custom' sx={{ p: 3, height: '100%', overflowY: 'auto' }}>
               <Box sx={{ display: 'grid', gap: 2.5 }}>
                 <TextField
-                  label='Cost per cleaning'
+                  label={text.costPerCleaning}
                   type='number'
                   value={customCostPerVisit}
                   onChange={(event) =>
@@ -225,7 +279,7 @@ function LaborCostWidget({ priceData, onCostPerYearChange }: LaborCostWidgetProp
                   }}
                 />
                 <TextField
-                  label='Frequency'
+                  label={text.frequency}
                   type='number'
                   value={customFrequency}
                   onChange={(event) =>
@@ -234,15 +288,15 @@ function LaborCostWidget({ priceData, onCostPerYearChange }: LaborCostWidgetProp
                 />
                 <TextField
                   select
-                  label='Unit'
+                  label={text.unit}
                   value={customFrequencyUnit}
                   onChange={(event) =>
                     setCustomFrequencyUnit(event.target.value as CustomFrequencyUnit)
                   }
                 >
-                  <MenuItem value='week'>Times / Week</MenuItem>
-                  <MenuItem value='month'>Times / Month</MenuItem>
-                  <MenuItem value='year'>Times / Year</MenuItem>
+                  <MenuItem value='week'>{text.timesPerWeek}</MenuItem>
+                  <MenuItem value='month'>{text.timesPerMonth}</MenuItem>
+                  <MenuItem value='year'>{text.timesPerYear}</MenuItem>
                 </TextField>
               </Box>
             </TabPanel>
@@ -253,7 +307,7 @@ function LaborCostWidget({ priceData, onCostPerYearChange }: LaborCostWidgetProp
       <Divider />
       <CardActions sx={{ py: (theme) => theme.spacing(1.5), px: 3 }}>
         <Typography variant='body2' fontWeight={600}>
-          Cost / Year: {formatCurrency(activeCostPerYear)}
+          {text.costPerYear}: {formatLocalizedCurrency(activeCostPerYear)}
         </Typography>
       </CardActions>
     </JumboCard>
