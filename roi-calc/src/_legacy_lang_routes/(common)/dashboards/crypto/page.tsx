@@ -1,4 +1,4 @@
-import { getDictionary } from '@/app/[lang]/dictionaries';
+import { getDictionary } from '@/_legacy_lang_routes/dictionaries';
 import { BitcoinPrice } from '@/components/BitcoinPrice';
 import { CryptoNews } from '@/components/CryptoNews';
 import { CurrencyCalculator } from '@/components/CurrencyCalculator';

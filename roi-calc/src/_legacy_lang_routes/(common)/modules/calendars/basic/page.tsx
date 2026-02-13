@@ -1,4 +1,4 @@
-import { getDictionary } from '@/app/[lang]/dictionaries';
+import { getDictionary } from '@/_legacy_lang_routes/dictionaries';
 import { BasicCalendar } from '@/components/calendars/BasicCalendar';
 import { CalendarWrapper } from '@/components/calendars/CalendarWrapper';
 import { CONTAINER_MAX_WIDTH } from '@/config/layouts';

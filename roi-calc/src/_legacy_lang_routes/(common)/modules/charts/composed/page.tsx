@@ -1,4 +1,4 @@
-import { getDictionary } from '@/app/[lang]/dictionaries';
+import { getDictionary } from '@/_legacy_lang_routes/dictionaries';
 import { AxisLabelsComposedChart } from '@/components/charts/composed/AxisLabelsComposedChart';
 import { LineBarAreaComposedChart } from '@/components/charts/composed/LineBarAreaComposedChart';
 import { SameDataComposedChart } from '@/components/charts/composed/SameDataComposedChart';

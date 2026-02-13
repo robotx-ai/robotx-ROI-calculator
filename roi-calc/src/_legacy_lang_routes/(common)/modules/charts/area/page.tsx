@@ -1,4 +1,4 @@
-import { getDictionary } from '@/app/[lang]/dictionaries';
+import { getDictionary } from '@/_legacy_lang_routes/dictionaries';
 import { ConnectNullAreaChart } from '@/components/charts/area/ConnectNullAreaChart';
 import { PercentAreaChart } from '@/components/charts/area/PercentAreaChart';
 import { SimpleAreaChart } from '@/components/charts/area/SimpleAreaChart';

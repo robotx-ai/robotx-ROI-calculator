@@ -1,4 +1,4 @@
-import { getDictionary } from '@/app/[lang]/dictionaries';
+import { getDictionary } from '@/_legacy_lang_routes/dictionaries';
 import { UserGridItem } from '@/components/UserGridItem';
 import { UserProps, users } from '@/components/UserGridItem/data';
 import { View } from '@/components/View';

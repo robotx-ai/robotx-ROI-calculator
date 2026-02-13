@@ -1,4 +1,4 @@
-import { getDictionary } from '@/app/[lang]/dictionaries';
+import { getDictionary } from '@/_legacy_lang_routes/dictionaries';
 import { SimpleRadarChart } from '@/components/charts/radar/SimpleRadarChart';
 import { SpecificDomainRadarChart } from '@/components/charts/radar/SpecificDomainRadarChart';
 

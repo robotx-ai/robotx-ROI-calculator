@@ -1,4 +1,4 @@
-import { getDictionary } from '@/app/[lang]/dictionaries';
+import { getDictionary } from '@/_legacy_lang_routes/dictionaries';
 import { DzBasic } from '@/components/dropzone/DzBasic';
 import { DzDisabled } from '@/components/dropzone/DzDisabled';
 import { DzPreviews } from '@/components/dropzone/DzPreviews';

@@ -1,4 +1,4 @@
-import { getDictionary } from '@/app/[lang]/dictionaries';
+import { getDictionary } from '@/_legacy_lang_routes/dictionaries';
 import { GeoLocationMap } from '@/components/maps/GeoLocationMap';
 import { MapProvider } from '@/components/maps/MapProvider';
 import { CONTAINER_MAX_WIDTH } from '@/config/layouts';

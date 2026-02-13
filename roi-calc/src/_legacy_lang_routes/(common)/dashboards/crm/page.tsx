@@ -1,4 +1,4 @@
-import { getDictionary } from '@/app/[lang]/dictionaries';
+import { getDictionary } from '@/_legacy_lang_routes/dictionaries';
 import { CurrencyCalculator } from '@/components/CurrencyCalculator';
 import { CurrentProjectsList } from '@/components/CurrentProjectsList';
 import { FilesCounterCard } from '@/components/FilesCounterCard';

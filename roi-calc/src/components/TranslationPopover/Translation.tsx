@@ -1,4 +1,4 @@
-import { getDictionary } from '@/app/[lang]/dictionaries';
+import { getDictionary } from '@/_legacy_lang_routes/dictionaries';
 import { JumboIconButton } from '@jumbo/components/JumboIconButton';
 import { Span } from '@jumbo/shared';
 import { ListItemIcon, ListItemText, Menu, MenuItem } from '@mui/material';

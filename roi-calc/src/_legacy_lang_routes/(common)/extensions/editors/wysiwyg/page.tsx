@@ -1,4 +1,4 @@
-import { getDictionary } from '@/app/[lang]/dictionaries';
+import { getDictionary } from '@/_legacy_lang_routes/dictionaries';
 import { TipTapWysiwygEditor } from '@/components/TipTapWysiwygEditor';
 // import { WysiwygEditor } from '@/_components/extensions/editors/wysiwyg';
 import { CONTAINER_MAX_WIDTH } from '@/config/layouts';

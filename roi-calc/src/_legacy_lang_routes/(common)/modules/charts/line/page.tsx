@@ -1,4 +1,4 @@
-import { getDictionary } from '@/app/[lang]/dictionaries';
+import { getDictionary } from '@/_legacy_lang_routes/dictionaries';
 import { ConnectNullLineChart } from '@/components/charts/line/ConnectNullLinChart';
 import { CustomizedDotLineChart } from '@/components/charts/line/CustomizedDotLineChart';
 import { DashedLineChart } from '@/components/charts/line/DashedLineChart';

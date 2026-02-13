@@ -1,4 +1,4 @@
-import { getDictionary } from '@/app/[lang]/dictionaries';
+import { getDictionary } from '@/_legacy_lang_routes/dictionaries';
 import { CustomActiveShapePieChart } from '@/components/charts/pie/CustomActiveShapePieChart';
 import { CustomizedLabelPieChart } from '@/components/charts/pie/CustomLabelPieChart';
 import { PaddingAnglePieChart } from '@/components/charts/pie/PaddingAnglePieChart';

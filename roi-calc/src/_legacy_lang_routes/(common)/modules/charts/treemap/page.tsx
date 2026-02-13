@@ -1,4 +1,4 @@
-import { getDictionary } from '@/app/[lang]/dictionaries';
+import { getDictionary } from '@/_legacy_lang_routes/dictionaries';
 import { CustomContentTreemapChart } from '@/components/charts/treemap/CustomContentTreemapChart';
 import { SimpleTreemapChart } from '@/components/charts/treemap/SimpleTreemapChart';
 

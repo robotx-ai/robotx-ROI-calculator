@@ -1,4 +1,4 @@
-import { getDictionary } from '@/app/[lang]/dictionaries';
+import { getDictionary } from '@/_legacy_lang_routes/dictionaries';
 import { Cities } from '@/components/Cities';
 import { DealsClosed } from '@/components/DealsClosed';
 import { PopularAgents } from '@/components/PopularAgents';

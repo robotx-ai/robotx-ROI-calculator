@@ -1,4 +1,4 @@
-import { getDictionary } from '@/app/[lang]/dictionaries';
+import { getDictionary } from '@/_legacy_lang_routes/dictionaries';
 import { AyurvedaCard } from '@/components/AyurvedaCard';
 import { CityBgCard } from '@/components/CityBgCard';
 import { CryptoNews } from '@/components/CryptoNews';

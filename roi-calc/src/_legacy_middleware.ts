@@ -1,5 +1,5 @@
-import { anonymousMiddleware, authMiddleware } from '@/middleware/auth';
-import { prefixLocale } from '@/middleware/locale';
+import { anonymousMiddleware, authMiddleware } from '@/_legacy_middleware_dir/auth';
+import { prefixLocale } from '@/_legacy_middleware_dir/locale';
 import { isAnonymousPath, isPublicPath } from '@/utilities/helpers/path';
 import { match } from '@formatjs/intl-localematcher';
 import Negotiator from 'negotiator';

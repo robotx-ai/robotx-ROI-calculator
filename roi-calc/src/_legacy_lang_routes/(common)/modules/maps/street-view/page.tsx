@@ -1,4 +1,4 @@
-import { getDictionary } from '@/app/[lang]/dictionaries';
+import { getDictionary } from '@/_legacy_lang_routes/dictionaries';
 import { MapProvider } from '@/components/maps/MapProvider';
 import { StreetViewPanoramaMap } from '@/components/maps/StreetViewPanoramaMap';
 import { CONTAINER_MAX_WIDTH } from '@/config/layouts';

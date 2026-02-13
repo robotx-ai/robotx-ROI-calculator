@@ -1,4 +1,4 @@
-import { getDictionary } from '@/app/[lang]/dictionaries';
+import { getDictionary } from '@/_legacy_lang_routes/dictionaries';
 import { AppUsers } from '@/components/AppUsers';
 import { LastMonthSales } from '@/components/LastMonthSales';
 import { LatestNotifications } from '@/components/LatestNotifications';

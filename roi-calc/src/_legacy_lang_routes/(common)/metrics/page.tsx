@@ -1,4 +1,4 @@
-import { getDictionary } from '@/app/[lang]/dictionaries';
+import { getDictionary } from '@/_legacy_lang_routes/dictionaries';
 import { ActiveUsers } from '@/components/ActiveUsers';
 import { AvgDailyTraffic } from '@/components/AvgDailyTraffic';
 import { CreditScore } from '@/components/CreditScore';

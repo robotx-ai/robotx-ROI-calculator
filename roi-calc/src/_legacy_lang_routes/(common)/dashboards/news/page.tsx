@@ -1,4 +1,4 @@
-import { getDictionary } from '@/app/[lang]/dictionaries';
+import { getDictionary } from '@/_legacy_lang_routes/dictionaries';
 import { AvgDailyTraffic } from '@/components/AvgDailyTraffic';
 import { Comments } from '@/components/Comments';
 import { DailyFeed } from '@/components/DailyFeed';

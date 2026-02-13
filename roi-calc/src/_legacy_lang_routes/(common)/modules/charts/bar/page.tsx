@@ -1,4 +1,4 @@
-import { getDictionary } from '@/app/[lang]/dictionaries';
+import { getDictionary } from '@/_legacy_lang_routes/dictionaries';
 import { BiaxialBarChart } from '@/components/charts/bar/BiaxialBarChart';
 import { CustomShapeBarChart } from '@/components/charts/bar/CustomShapeBarChart';
 import { MixBarChart } from '@/components/charts/bar/MixBarChart';

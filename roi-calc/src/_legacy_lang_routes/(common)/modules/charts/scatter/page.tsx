@@ -1,4 +1,4 @@
-import { getDictionary } from '@/app/[lang]/dictionaries';
+import { getDictionary } from '@/_legacy_lang_routes/dictionaries';
 import { JointScatterChart } from '@/components/charts/scatter/JointScatterChart';
 import { MultipleYAxesScatterChart } from '@/components/charts/scatter/MultipleYAxesScatterChart';
 import { SimpleScatterChart } from '@/components/charts/scatter/SimpleScatterChart';

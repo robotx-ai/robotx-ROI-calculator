@@ -1,4 +1,4 @@
-import { getDictionary } from '@/app/[lang]/dictionaries';
+import { getDictionary } from '@/_legacy_lang_routes/dictionaries';
 import { AdvancedAlert } from '@/components/sweet-alerts/AdvancedAlert';
 import { AlertsType } from '@/components/sweet-alerts/AlertsType';
 import { AnimationAlert } from '@/components/sweet-alerts/AnimationAlert';

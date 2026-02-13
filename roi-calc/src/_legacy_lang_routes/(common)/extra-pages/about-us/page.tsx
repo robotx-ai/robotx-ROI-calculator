@@ -1,4 +1,4 @@
-import { getDictionary } from '@/app/[lang]/dictionaries';
+import { getDictionary } from '@/_legacy_lang_routes/dictionaries';
 import { CONTAINER_MAX_WIDTH } from '@/config/layouts';
 import { Params } from '@/types/paramsType';
 import { ASSET_IMAGES } from '@/utilities/constants/paths';
