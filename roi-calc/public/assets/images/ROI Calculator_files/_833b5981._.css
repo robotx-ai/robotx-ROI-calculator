@@ -1,0 +1,53 @@
+/* [project]/src/styles/style.css [app-client] (css) */
+#root {
+  width: 100%;
+  min-width: 0;
+  height: 100%;
+  min-height: 100vh;
+  display: flex;
+}
+
+/* [project]/@assets/fonts/noir-pro/styles.css [app-client] (css) */
+@font-face {
+  font-family: NoirPro;
+  src: url("../media/NoirPro-Light.ba8c5edf.eot") format("embedded-opentype"), url("../media/NoirPro-Light.f7d5b708.woff") format("woff"), url("../media/NoirPro-Light.9890cfb6.woff2") format("woff2");
+  font-weight: 300;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: NoirPro;
+  src: url("../media/NoirPro-Regular.346a6f7c.eot") format("embedded-opentype"), url("../media/NoirPro-Regular.dde7b73a.woff") format("woff"), url("../media/NoirPro-Regular.3bc0d2a2.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: NoirPro;
+  src: url("../media/NoirPro-Medium.a043ed66.eot") format("embedded-opentype"), url("../media/NoirPro-Medium.236da026.woff") format("woff"), url("../media/NoirPro-Medium.5f8dac60.woff2") format("woff2");
+  font-weight: 500;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: NoirPro;
+  src: url("../media/NoirPro-SemiBold.58df8eb1.eot") format("embedded-opentype"), url("../media/NoirPro-SemiBold.1603cbb8.woff") format("woff"), url("../media/NoirPro-SemiBold.f20649e8.woff2") format("woff2");
+  font-weight: 600;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: NoirPro;
+  src: url("../media/NoirPro-Bold.f39adb93.eot") format("embedded-opentype"), url("../media/NoirPro-Bold.61820f6d.woff") format("woff"), url("../media/NoirPro-Bold.002ee152.woff2") format("woff2");
+  font-weight: 700;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: NoirPro;
+  src: url("../media/NoirPro-Heavy.6260cd3c.eot") format("embedded-opentype"), url("../media/NoirPro-Heavy.d7196d6f.woff") format("woff"), url("../media/NoirPro-Heavy.1f43ce52.woff2") format("woff2");
+  font-weight: 900;
+  font-style: normal;
+}
+
+/*# sourceMappingURL=_833b5981._.css.map*/

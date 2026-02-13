@@ -1,10 +1,6 @@
-import { RoiMetricCard } from '@/components/RoiMetricCard';
-import BuildCircleOutlinedIcon from '@mui/icons-material/BuildCircleOutlined';
-import CleaningServicesOutlinedIcon from '@mui/icons-material/CleaningServicesOutlined';
-import PaidOutlinedIcon from '@mui/icons-material/PaidOutlined';
-import SmartToyOutlinedIcon from '@mui/icons-material/SmartToyOutlined';
+import { RoiWorkspace } from '@/components/RoiWorkspace';
 import { Box, Container } from '@mui/material';
-import Grid from '@mui/material/Grid2';
+import { CONTAINER_MAX_WIDTH } from '@/config/layouts';
 import { readFile } from 'fs/promises';
 import path from 'path';
 
@@ -16,17 +12,19 @@ type ModelData = {
   robot_cleaning_rate_sqft_per_hour: number;
 };
 
-const formatUsd = (value: number) =>
-  new Intl.NumberFormat('en-US', {
-    style: 'currency',
-    currency: 'USD',
-    maximumFractionDigits: 0,
-  }).format(value);
+type PriceBand = {
+  lowest: number;
+  highest: number;
+  average_range: {
+    min: number;
+    max: number;
+  };
+};
 
-const formatNumber = (value: number) =>
-  new Intl.NumberFormat('en-US', {
-    maximumFractionDigits: 0,
-  }).format(value);
+type PriceData = {
+  price_per_sqft: PriceBand;
+  price_per_hour: PriceBand;
+};
 
 async function getModelData(): Promise<ModelData> {
   const dataPath = path.join(process.cwd(), '..', 'model_data', 'CC1_Pro.json');
@@ -34,55 +32,28 @@ async function getModelData(): Promise<ModelData> {
   return JSON.parse(json) as ModelData;
 }
 
+async function getPriceData(): Promise<PriceData> {
+  const dataPath = path.join(process.cwd(), '..', 'model_data', 'price_data.json');
+  const json = await readFile(dataPath, 'utf-8');
+  return JSON.parse(json) as PriceData;
+}
+
 export default async function HomePage() {
-  const modelData = await getModelData();
+  const [modelData, priceData] = await Promise.all([getModelData(), getPriceData()]);
 
   return (
     <Container
       maxWidth={false}
       sx={{
-        maxWidth: 1320,
-        minHeight: 'calc(100vh - 64px)',
+        minHeight: '100vh',
+        maxWidth: CONTAINER_MAX_WIDTH,
         mx: 'auto',
         pt: 4,
-        pb: 4,
+        px: 'clamp(24px, 6vw, 96px)',
       }}
     >
-      <Box sx={{ width: '100%' }}>
-        <Grid container spacing={3.75}>
-          <Grid size={{ xs: 12, md: 6, lg: 3 }}>
-            <RoiMetricCard
-              bgColor='#6f42c1'
-              value={modelData.robot_model}
-              label='Robot Model'
-              Icon={SmartToyOutlinedIcon}
-            />
-          </Grid>
-          <Grid size={{ xs: 12, md: 6, lg: 3 }}>
-            <RoiMetricCard
-              bgColor='#E44A77'
-              value={formatUsd(modelData.robot_msrp_usd)}
-              label='MSRP (USD)'
-              Icon={PaidOutlinedIcon}
-            />
-          </Grid>
-          <Grid size={{ xs: 12, md: 6, lg: 3 }}>
-            <RoiMetricCard
-              bgColor='#E73145'
-              value={formatUsd(modelData.maintenance_cost_per_year_usd)}
-              label='Maintenance / year'
-              Icon={BuildCircleOutlinedIcon}
-            />
-          </Grid>
-          <Grid size={{ xs: 12, md: 6, lg: 3 }}>
-            <RoiMetricCard
-              bgColor='#23BCBA'
-              value={formatNumber(modelData.robot_cleaning_rate_sqft_per_hour)}
-              label='sq ft/hour'
-              Icon={CleaningServicesOutlinedIcon}
-            />
-          </Grid>
-        </Grid>
+      <Box>
+        <RoiWorkspace modelData={modelData} priceData={priceData} />
       </Box>
     </Container>
   );
