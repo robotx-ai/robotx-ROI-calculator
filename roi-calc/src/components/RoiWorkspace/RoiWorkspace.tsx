@@ -5,6 +5,7 @@ import { RobotMaintenanceCostWidget } from '@/components/RobotMaintenanceCostWid
 import { RobotMetricsPanel } from '@/components/RobotMetricsPanel';
 import { RoiAnalysisWidget } from '@/components/RoiAnalysisWidget';
 import { Box, Typography } from '@mui/material';
+import { RoiAreaSwitcher, RoiCurrencySwitcher } from '@/components/RoiUnits';
 import React from 'react';
 
 type ModelData = {
@@ -75,7 +76,11 @@ function RoiWorkspace({ modelData, priceData }: RoiWorkspaceProps) {
         <Typography variant='h4' sx={{ fontWeight: 600, lineHeight: 1.2 }}>
           ROI Calculator
         </Typography>
-        <RoiLanguageSwitcher />
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+          <RoiCurrencySwitcher />
+          <RoiAreaSwitcher />
+          <RoiLanguageSwitcher />
+        </Box>
       </Box>
 
       <Box

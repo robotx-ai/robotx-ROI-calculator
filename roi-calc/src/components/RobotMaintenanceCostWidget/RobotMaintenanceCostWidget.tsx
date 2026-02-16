@@ -1,6 +1,7 @@
 'use client';
 import { JumboCard } from '@jumbo/components';
 import { useRoiLocale } from '@/components/RoiLocale';
+import { convertFromUsd, convertToUsd, useRoiUnits } from '@/components/RoiUnits';
 import { Box, CardActions, Divider, Slider, Typography } from '@mui/material';
 import React from 'react';
 
@@ -19,6 +20,7 @@ function RobotMaintenanceCostWidget({
   panelHeight = 430,
 }: RobotMaintenanceCostWidgetProps) {
   const { locale } = useRoiLocale();
+  const { currencyUnit } = useRoiUnits();
   const isZh = locale === 'zh-CN';
   const [laborHoursPerDay, setLaborHoursPerDay] = React.useState(1);
   const [hourlyWage, setHourlyWage] = React.useState(25);
@@ -35,28 +37,32 @@ function RobotMaintenanceCostWidget({
     });
   }, [costPerYear, hourlyWage, laborHoursPerDay, onChange, workingDays]);
 
+  const currencyCode = currencyUnit === 'USD' ? 'USD' : 'CNY';
+
   const formatCurrency = React.useCallback(
     (value: number) =>
       new Intl.NumberFormat(locale, {
         style: 'currency',
-        currency: 'USD',
+        currency: currencyCode,
         maximumFractionDigits: 2,
       }).format(value),
-    [locale]
+    [currencyCode, locale]
   );
+
+  const displayHourlyWage = convertFromUsd(hourlyWage, currencyUnit);
 
   const text = isZh
     ? {
         title: '机器人维护成本',
         laborRequired: '所需人工（小时/天）',
-        hourlyWage: '时薪（USD/小时）',
+        hourlyWage: `时薪（${currencyUnit}/小时）`,
         annualWorkingDays: '年工作天数（天/年）',
         costPerYear: '年成本',
       }
     : {
         title: 'Robot Maintenance Cost',
         laborRequired: 'Labor Required (hours/day)',
-        hourlyWage: 'Hourly Wage (USD/hour)',
+        hourlyWage: `Hourly Wage (${currencyUnit}/hour)`,
         annualWorkingDays: 'Annual Working Days (day/year)',
         costPerYear: 'Cost / Year',
       };
@@ -88,15 +94,17 @@ function RobotMaintenanceCostWidget({
         </Box>
         <Box>
           <Typography variant='body2' mb={1}>
-            {text.hourlyWage}: {formatCurrency(hourlyWage)}
+            {text.hourlyWage}: {formatCurrency(displayHourlyWage)}
           </Typography>
           <Slider
-            value={hourlyWage}
-            min={10}
-            max={30}
+            value={displayHourlyWage}
+            min={convertFromUsd(10, currencyUnit)}
+            max={convertFromUsd(30, currencyUnit)}
             step={1}
             onChange={(event, nextValue) =>
-              setHourlyWage(Array.isArray(nextValue) ? nextValue[0] : nextValue)
+              setHourlyWage(
+                convertToUsd(Array.isArray(nextValue) ? nextValue[0] : nextValue, currencyUnit)
+              )
             }
           />
         </Box>
@@ -119,7 +127,7 @@ function RobotMaintenanceCostWidget({
       <Divider />
       <CardActions sx={{ py: (theme) => theme.spacing(1.5), px: 3 }}>
         <Typography variant='body2' fontWeight={600}>
-          {text.costPerYear}: {formatCurrency(costPerYear)}
+          {text.costPerYear}: {formatCurrency(convertFromUsd(costPerYear, currencyUnit))}
         </Typography>
       </CardActions>
     </JumboCard>

@@ -1,6 +1,15 @@
 'use client';
 import { JumboCard } from '@jumbo/components';
 import { useRoiLocale } from '@/components/RoiLocale';
+import {
+  convertFromSqft,
+  convertFromUsd,
+  convertRateFromPerSqft,
+  convertRateToPerSqft,
+  convertToSqft,
+  convertToUsd,
+  useRoiUnits,
+} from '@/components/RoiUnits';
 import { TabContext, TabList, TabPanel } from '@mui/lab';
 import {
   Box,
@@ -38,6 +47,7 @@ interface LaborCostWidgetProps {
 
 function LaborCostWidget({ priceData, onCostPerYearChange }: LaborCostWidgetProps) {
   const { locale } = useRoiLocale();
+  const { currencyUnit, areaUnit } = useRoiUnits();
   const isZh = locale === 'zh-CN';
   const [tabValue, setTabValue] = React.useState('area');
 
@@ -83,15 +93,26 @@ function LaborCostWidget({ priceData, onCostPerYearChange }: LaborCostWidgetProp
     onCostPerYearChange?.(activeCostPerYear);
   }, [activeCostPerYear, onCostPerYearChange]);
 
+  const currencyCode = currencyUnit === 'USD' ? 'USD' : 'CNY';
+
   const formatLocalizedCurrency = React.useCallback(
     (value: number) =>
       new Intl.NumberFormat(locale, {
         style: 'currency',
-        currency: 'USD',
+        currency: currencyCode,
         maximumFractionDigits: 2,
       }).format(value),
-    [locale]
+    [currencyCode, locale]
   );
+
+  const areaUnitLabel = areaUnit === 'sqft' ? 'sq ft' : 'sqm';
+  const areaUnitLabelZh = areaUnit === 'sqft' ? '平方英尺' : '平方米';
+  const displayHourlyCost = convertFromUsd(hourlyCost, currencyUnit);
+  const displayAreaCost = convertFromUsd(
+    convertRateFromPerSqft(areaCost, areaUnit),
+    currencyUnit
+  );
+  const displayCleaningArea = convertFromSqft(cleaningArea, areaUnit);
 
   const text = isZh
     ? {
@@ -106,8 +127,8 @@ function LaborCostWidget({ priceData, onCostPerYearChange }: LaborCostWidgetProp
         hourUnit: '小时',
         cleaningFrequencyPerMonth: '每月清洁频次',
         areaCost: '面积成本',
-        perSqft: '/ 平方英尺',
-        cleaningArea: '清洁面积（平方英尺）',
+        perSqft: `/ ${areaUnitLabelZh}`,
+        cleaningArea: `清洁面积（${areaUnitLabelZh}）`,
         costPerCleaning: '每次清洁费用',
         frequency: '频次',
         unit: '单位',
@@ -128,8 +149,8 @@ function LaborCostWidget({ priceData, onCostPerYearChange }: LaborCostWidgetProp
         hourUnit: 'Hr',
         cleaningFrequencyPerMonth: 'Cleaning frequency / month',
         areaCost: 'Area Cost',
-        perSqft: '/ sq ft',
-        cleaningArea: 'Cleaning Area (sq ft)',
+        perSqft: `/ ${areaUnitLabel}`,
+        cleaningArea: `Cleaning Area (${areaUnitLabel})`,
         costPerCleaning: 'Cost per cleaning',
         frequency: 'Frequency',
         unit: 'Unit',
@@ -165,21 +186,32 @@ function LaborCostWidget({ priceData, onCostPerYearChange }: LaborCostWidgetProp
               <Box sx={{ display: 'grid', gap: 2.5 }}>
                 <Box>
                   <Typography variant='body2' mb={1}>
-                    {text.hourlyCost}: {formatLocalizedCurrency(hourlyCost)} {text.perHour}
+                    {text.hourlyCost}: {formatLocalizedCurrency(displayHourlyCost)}{' '}
+                    {text.perHour}
                   </Typography>
                   <Slider
-                    value={hourlyCost}
-                    min={priceData.price_per_hour.lowest}
-                    max={priceData.price_per_hour.highest}
+                    value={displayHourlyCost}
+                    min={convertFromUsd(priceData.price_per_hour.lowest, currencyUnit)}
+                    max={convertFromUsd(priceData.price_per_hour.highest, currencyUnit)}
                     step={1}
                     onChange={(event, nextValue) =>
-                      setHourlyCost(Array.isArray(nextValue) ? nextValue[0] : nextValue)
+                      setHourlyCost(
+                        convertToUsd(
+                          Array.isArray(nextValue) ? nextValue[0] : nextValue,
+                          currencyUnit
+                        )
+                      )
                     }
                   />
                   <Typography variant='caption' color='text.secondary'>
                     {text.range}:{' '}
-                    {formatLocalizedCurrency(priceData.price_per_hour.lowest)} -{' '}
-                    {formatLocalizedCurrency(priceData.price_per_hour.highest)}
+                    {formatLocalizedCurrency(
+                      convertFromUsd(priceData.price_per_hour.lowest, currencyUnit)
+                    )}{' '}
+                    -{' '}
+                    {formatLocalizedCurrency(
+                      convertFromUsd(priceData.price_per_hour.highest, currencyUnit)
+                    )}
                   </Typography>
                 </Box>
                 <Box>
@@ -219,29 +251,59 @@ function LaborCostWidget({ priceData, onCostPerYearChange }: LaborCostWidgetProp
               <Box sx={{ display: 'grid', gap: 2.5 }}>
                 <Box>
                   <Typography variant='body2' mb={1}>
-                    {text.areaCost}: {formatLocalizedCurrency(areaCost)} {text.perSqft}
+                    {text.areaCost}: {formatLocalizedCurrency(displayAreaCost)} {text.perSqft}
                   </Typography>
                   <Slider
-                    value={areaCost}
-                    min={priceData.price_per_sqft.lowest}
-                    max={priceData.price_per_sqft.highest}
+                    value={displayAreaCost}
+                    min={convertFromUsd(
+                      convertRateFromPerSqft(priceData.price_per_sqft.lowest, areaUnit),
+                      currencyUnit
+                    )}
+                    max={convertFromUsd(
+                      convertRateFromPerSqft(priceData.price_per_sqft.highest, areaUnit),
+                      currencyUnit
+                    )}
                     step={0.01}
                     onChange={(event, nextValue) =>
-                      setAreaCost(Array.isArray(nextValue) ? nextValue[0] : nextValue)
+                      setAreaCost(
+                        convertRateToPerSqft(
+                          convertToUsd(
+                            Array.isArray(nextValue) ? nextValue[0] : nextValue,
+                            currencyUnit
+                          ),
+                          areaUnit
+                        )
+                      )
                     }
                   />
                   <Typography variant='caption' color='text.secondary'>
                     {text.range}:{' '}
-                    {formatLocalizedCurrency(priceData.price_per_sqft.lowest)} -{' '}
-                    {formatLocalizedCurrency(priceData.price_per_sqft.highest)}
+                    {formatLocalizedCurrency(
+                      convertFromUsd(
+                        convertRateFromPerSqft(priceData.price_per_sqft.lowest, areaUnit),
+                        currencyUnit
+                      )
+                    )}{' '}
+                    -{' '}
+                    {formatLocalizedCurrency(
+                      convertFromUsd(
+                        convertRateFromPerSqft(priceData.price_per_sqft.highest, areaUnit),
+                        currencyUnit
+                      )
+                    )}
                   </Typography>
                 </Box>
                 <TextField
                   label={text.cleaningArea}
                   type='number'
-                  value={cleaningArea}
+                  value={Number(displayCleaningArea.toFixed(2))}
                   onChange={(event) =>
-                    setCleaningArea(Math.max(0, Number(event.target.value) || 0))
+                    setCleaningArea(
+                      Math.max(
+                        0,
+                        convertToSqft(Number(event.target.value) || 0, areaUnit)
+                      )
+                    )
                   }
                 />
                 <Box>
@@ -268,13 +330,18 @@ function LaborCostWidget({ priceData, onCostPerYearChange }: LaborCostWidgetProp
                 <TextField
                   label={text.costPerCleaning}
                   type='number'
-                  value={customCostPerVisit}
+                  value={Number(convertFromUsd(customCostPerVisit, currencyUnit).toFixed(2))}
                   onChange={(event) =>
-                    setCustomCostPerVisit(Math.max(0, Number(event.target.value) || 0))
+                    setCustomCostPerVisit(
+                      Math.max(
+                        0,
+                        convertToUsd(Number(event.target.value) || 0, currencyUnit)
+                      )
+                    )
                   }
                   InputProps={{
                     startAdornment: (
-                      <InputAdornment position='start'>$</InputAdornment>
+                      <InputAdornment position='start'>{currencyUnit}</InputAdornment>
                     ),
                   }}
                 />
@@ -307,7 +374,8 @@ function LaborCostWidget({ priceData, onCostPerYearChange }: LaborCostWidgetProp
       <Divider />
       <CardActions sx={{ py: (theme) => theme.spacing(1.5), px: 3 }}>
         <Typography variant='body2' fontWeight={600}>
-          {text.costPerYear}: {formatLocalizedCurrency(activeCostPerYear)}
+          {text.costPerYear}:{' '}
+          {formatLocalizedCurrency(convertFromUsd(activeCostPerYear, currencyUnit))}
         </Typography>
       </CardActions>
     </JumboCard>

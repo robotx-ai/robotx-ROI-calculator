@@ -1,5 +1,6 @@
 'use client';
 import { useRoiLocale } from '@/components/RoiLocale';
+import { convertFromUsd, useRoiUnits } from '@/components/RoiUnits';
 import { Div } from '@jumbo/shared';
 import { Card, CardHeader, Stack, Typography } from '@mui/material';
 import { styled } from '@mui/material/styles';
@@ -56,6 +57,7 @@ function RoiAnalysisWidget({
   panelHeight = 430,
 }: RoiAnalysisWidgetProps) {
   const { locale } = useRoiLocale();
+  const { currencyUnit } = useRoiUnits();
   const isZh = locale === 'zh-CN';
   const annualSavings = manualCostPerYear - robotLaborCostPerYear;
   const dailySavings = annualSavings / workingDaysPerYear;
@@ -82,24 +84,26 @@ function RoiAnalysisWidget({
     [annualMaintenanceCost, manualCostPerYear, purchasePrice, robotLaborCostPerYear]
   );
 
+  const currencyCode = currencyUnit === 'USD' ? 'USD' : 'CNY';
+
   const formatCurrency = React.useCallback(
     (value: number) =>
       new Intl.NumberFormat(locale, {
         style: 'currency',
-        currency: 'USD',
+        currency: currencyCode,
         maximumFractionDigits: 2,
       }).format(value),
-    [locale]
+    [currencyCode, locale]
   );
 
   const formatCurrencyRounded = React.useCallback(
     (value: number) =>
       new Intl.NumberFormat(locale, {
         style: 'currency',
-        currency: 'USD',
+        currency: currencyCode,
         maximumFractionDigits: 0,
       }).format(value),
-    [locale]
+    [currencyCode, locale]
   );
 
   const formatCompactCurrency = React.useCallback(
@@ -107,10 +111,10 @@ function RoiAnalysisWidget({
       new Intl.NumberFormat(locale, {
         notation: 'compact',
         style: 'currency',
-        currency: 'USD',
+        currency: currencyCode,
         maximumFractionDigits: 1,
       }).format(value),
-    [locale]
+    [currencyCode, locale]
   );
 
   const text = isZh
@@ -144,11 +148,11 @@ function RoiAnalysisWidget({
   const metricItems = [
     {
       label: text.dailySavings,
-      value: formatCurrencyRounded(dailySavings),
+      value: formatCurrencyRounded(convertFromUsd(dailySavings, currencyUnit)),
     },
     {
       label: text.annualSavings,
-      value: formatCurrencyRounded(annualSavings),
+      value: formatCurrencyRounded(convertFromUsd(annualSavings, currencyUnit)),
     },
     {
       label: text.paybackPeriod,
@@ -160,7 +164,7 @@ function RoiAnalysisWidget({
     },
     {
       label: text.fiveYearNetBenefit,
-      value: formatCurrencyRounded(fiveYearNetBenefit),
+      value: formatCurrencyRounded(convertFromUsd(fiveYearNetBenefit, currencyUnit)),
     },
   ];
 
@@ -231,10 +235,14 @@ function RoiAnalysisWidget({
             <YAxis
               axisLine={false}
               tickLine={false}
-              tickFormatter={formatCompactCurrency}
+              tickFormatter={(value: number) =>
+                formatCompactCurrency(convertFromUsd(value, currencyUnit))
+              }
             />
             <Tooltip
-              formatter={(value: number) => formatCurrency(value)}
+              formatter={(value: number) =>
+                formatCurrency(convertFromUsd(value, currencyUnit))
+              }
               labelFormatter={(label) => `${text.monthLabel} ${label}`}
               wrapperStyle={{
                 background: ROI_ANALYSIS_COLORS.tooltipBg,

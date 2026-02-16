@@ -3,6 +3,7 @@ import type { Metadata } from 'next';
 
 import { AppSnackbar } from '@/components/AppSnackbar';
 import { RoiLocaleProvider } from '@/components/RoiLocale';
+import { RoiUnitProvider } from '@/components/RoiUnits';
 import { CONFIG } from '@/config';
 import '@/styles/style.css';
 import '@assets/fonts/noir-pro/styles.css';
@@ -33,15 +34,17 @@ export default function RootLayout({
         <div id='root'>
           <AppRouterCacheProvider>
             <RoiLocaleProvider>
-              <JumboConfigProvider LinkComponent={Link}>
-                <JumboTheme init={CONFIG.THEME}>
-                  <CssBaseline />
-                  <JumboDialogProvider>
-                    <JumboDialog />
-                    <AppSnackbar>{children}</AppSnackbar>
-                  </JumboDialogProvider>
-                </JumboTheme>
-              </JumboConfigProvider>
+              <RoiUnitProvider>
+                <JumboConfigProvider LinkComponent={Link}>
+                  <JumboTheme init={CONFIG.THEME}>
+                    <CssBaseline />
+                    <JumboDialogProvider>
+                      <JumboDialog />
+                      <AppSnackbar>{children}</AppSnackbar>
+                    </JumboDialogProvider>
+                  </JumboTheme>
+                </JumboConfigProvider>
+              </RoiUnitProvider>
             </RoiLocaleProvider>
           </AppRouterCacheProvider>
         </div>
