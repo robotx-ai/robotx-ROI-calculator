@@ -113,6 +113,29 @@ function LaborCostWidget({ priceData, onCostPerYearChange }: LaborCostWidgetProp
     currencyUnit
   );
   const displayCleaningArea = convertFromSqft(cleaningArea, areaUnit);
+  const [cleaningAreaInput, setCleaningAreaInput] = React.useState(() =>
+    Number(displayCleaningArea.toFixed(2)).toString()
+  );
+  const [customCostInput, setCustomCostInput] = React.useState(() =>
+    Number(convertFromUsd(customCostPerVisit, currencyUnit).toFixed(2)).toString()
+  );
+  const [customFrequencyInput, setCustomFrequencyInput] = React.useState(
+    customFrequency.toString()
+  );
+
+  React.useEffect(() => {
+    setCleaningAreaInput(Number(displayCleaningArea.toFixed(2)).toString());
+  }, [displayCleaningArea]);
+
+  React.useEffect(() => {
+    setCustomCostInput(
+      Number(convertFromUsd(customCostPerVisit, currencyUnit).toFixed(2)).toString()
+    );
+  }, [currencyUnit, customCostPerVisit]);
+
+  React.useEffect(() => {
+    setCustomFrequencyInput(customFrequency.toString());
+  }, [customFrequency]);
 
   const text = isZh
     ? {
@@ -296,15 +319,30 @@ function LaborCostWidget({ priceData, onCostPerYearChange }: LaborCostWidgetProp
                 <TextField
                   label={text.cleaningArea}
                   type='number'
-                  value={Number(displayCleaningArea.toFixed(2))}
-                  onChange={(event) =>
-                    setCleaningArea(
-                      Math.max(
-                        0,
-                        convertToSqft(Number(event.target.value) || 0, areaUnit)
-                      )
-                    )
-                  }
+                  value={cleaningAreaInput}
+                  onChange={(event) => {
+                    const { value } = event.target;
+                    setCleaningAreaInput(value);
+
+                    if (value === '') return;
+
+                    const parsed = Number(value);
+                    if (Number.isNaN(parsed)) return;
+
+                    setCleaningArea(Math.max(0, convertToSqft(parsed, areaUnit)));
+                  }}
+                  onBlur={() => {
+                    if (cleaningAreaInput === '') {
+                      setCleaningArea(0);
+                      setCleaningAreaInput('0');
+                      return;
+                    }
+
+                    const parsed = Number(cleaningAreaInput);
+                    const normalized = Number.isNaN(parsed) ? 0 : Math.max(0, parsed);
+                    setCleaningArea(convertToSqft(normalized, areaUnit));
+                    setCleaningAreaInput(Number(normalized.toFixed(2)).toString());
+                  }}
                 />
                 <Box>
                   <Typography variant='body2' mb={1}>
@@ -330,15 +368,32 @@ function LaborCostWidget({ priceData, onCostPerYearChange }: LaborCostWidgetProp
                 <TextField
                   label={text.costPerCleaning}
                   type='number'
-                  value={Number(convertFromUsd(customCostPerVisit, currencyUnit).toFixed(2))}
-                  onChange={(event) =>
+                  value={customCostInput}
+                  onChange={(event) => {
+                    const { value } = event.target;
+                    setCustomCostInput(value);
+
+                    if (value === '') return;
+
+                    const parsed = Number(value);
+                    if (Number.isNaN(parsed)) return;
+
                     setCustomCostPerVisit(
-                      Math.max(
-                        0,
-                        convertToUsd(Number(event.target.value) || 0, currencyUnit)
-                      )
-                    )
-                  }
+                      Math.max(0, convertToUsd(parsed, currencyUnit))
+                    );
+                  }}
+                  onBlur={() => {
+                    if (customCostInput === '') {
+                      setCustomCostPerVisit(0);
+                      setCustomCostInput('0');
+                      return;
+                    }
+
+                    const parsed = Number(customCostInput);
+                    const normalized = Number.isNaN(parsed) ? 0 : Math.max(0, parsed);
+                    setCustomCostPerVisit(convertToUsd(normalized, currencyUnit));
+                    setCustomCostInput(Number(normalized.toFixed(2)).toString());
+                  }}
                   InputProps={{
                     startAdornment: (
                       <InputAdornment position='start'>{currencyUnit}</InputAdornment>
@@ -348,10 +403,30 @@ function LaborCostWidget({ priceData, onCostPerYearChange }: LaborCostWidgetProp
                 <TextField
                   label={text.frequency}
                   type='number'
-                  value={customFrequency}
-                  onChange={(event) =>
-                    setCustomFrequency(Math.max(0, Number(event.target.value) || 0))
-                  }
+                  value={customFrequencyInput}
+                  onChange={(event) => {
+                    const { value } = event.target;
+                    setCustomFrequencyInput(value);
+
+                    if (value === '') return;
+
+                    const parsed = Number(value);
+                    if (Number.isNaN(parsed)) return;
+
+                    setCustomFrequency(Math.max(0, parsed));
+                  }}
+                  onBlur={() => {
+                    if (customFrequencyInput === '') {
+                      setCustomFrequency(0);
+                      setCustomFrequencyInput('0');
+                      return;
+                    }
+
+                    const parsed = Number(customFrequencyInput);
+                    const normalized = Number.isNaN(parsed) ? 0 : Math.max(0, parsed);
+                    setCustomFrequency(normalized);
+                    setCustomFrequencyInput(normalized.toString());
+                  }}
                 />
                 <TextField
                   select
