@@ -6,7 +6,7 @@ import BuildCircleOutlinedIcon from '@mui/icons-material/BuildCircleOutlined';
 import CleaningServicesOutlinedIcon from '@mui/icons-material/CleaningServicesOutlined';
 import PaidOutlinedIcon from '@mui/icons-material/PaidOutlined';
 import SmartToyOutlinedIcon from '@mui/icons-material/SmartToyOutlined';
-import { Box } from '@mui/material';
+import { Box, Typography } from '@mui/material';
 import React from 'react';
 
 type ModelData = {
@@ -19,6 +19,7 @@ type ModelData = {
 
 interface RobotMetricsPanelProps {
   modelData: ModelData;
+  robotsNeeded: number;
 }
 
 type MaintenanceUnit = 'year' | 'month' | 'week';
@@ -34,13 +35,13 @@ const CARD_COLORS = {
     month: '#5d849e',
     week: '#5d8d9e',
   },
-  cleaningByUnit: {
+  robotsAndCleaning: {
     hour: '#735d9e',
     day: '#815d9e',
   },
 } as const;
 
-function RobotMetricsPanel({ modelData }: RobotMetricsPanelProps) {
+function RobotMetricsPanel({ modelData, robotsNeeded }: RobotMetricsPanelProps) {
   const { locale } = useRoiLocale();
   const { currencyUnit, areaUnit } = useRoiUnits();
   const isZh = locale === 'zh-CN';
@@ -162,11 +163,37 @@ function RobotMetricsPanel({ modelData }: RobotMetricsPanelProps) {
       </Box>
       <Box>
         <RoiMetricCard
-          bgColor={CARD_COLORS.cleaningByUnit[cleaningRateUnit]}
-          value={formatNumber(
-            convertFromSqft(cleaningRateValueByUnit[cleaningRateUnit], areaUnit)
-          )}
-          label={cleaningRateUnitLabel[cleaningRateUnit]}
+          bgColor={CARD_COLORS.robotsAndCleaning[cleaningRateUnit]}
+          value={
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, minWidth: 0 }}>
+              <Box sx={{ flex: 1, minWidth: 0 }}>
+                <Typography color='common.white' variant='h3' mb={0.25}>
+                  {formatNumber(robotsNeeded)}
+                </Typography>
+                <Typography color='common.white' variant='h6' mb={0}>
+                  {isZh ? '所需机器人数量' : '# of Robots Needed'}
+                </Typography>
+              </Box>
+              <Box
+                sx={{
+                  width: '1px',
+                  alignSelf: 'stretch',
+                  bgcolor: 'rgba(255, 255, 255, 0.28)',
+                }}
+              />
+              <Box sx={{ flex: 1, minWidth: 0 }}>
+                <Typography color='common.white' variant='h3' mb={0.25}>
+                  {formatNumber(
+                    convertFromSqft(cleaningRateValueByUnit[cleaningRateUnit], areaUnit)
+                  )}
+                </Typography>
+                <Typography color='common.white' variant='body2' mb={0}>
+                  {cleaningRateUnitLabel[cleaningRateUnit]}
+                </Typography>
+              </Box>
+            </Box>
+          }
+          label=''
           Icon={CleaningServicesOutlinedIcon}
           onClick={cycleCleaningRateUnit}
           fullHeight={true}

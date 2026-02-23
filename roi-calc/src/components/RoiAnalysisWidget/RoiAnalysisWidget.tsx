@@ -22,6 +22,7 @@ interface RoiAnalysisWidgetProps {
   manualCostPerYear: number;
   robotLaborCostPerYear: number;
   workingDaysPerYear: number;
+  robotsNeeded: number;
   panelHeight?: number;
 }
 
@@ -37,7 +38,7 @@ export const ROI_ANALYSIS_COLORS = {
 
 const MetricItem = styled('div')(({ theme }) => ({
   color: theme.palette.common.white,
-  width: '20%',
+  width: '16.66%',
   minWidth: 0,
   padding: theme.spacing(0, 2, 1),
   [theme.breakpoints.down('lg')]: {
@@ -54,6 +55,7 @@ function RoiAnalysisWidget({
   manualCostPerYear,
   robotLaborCostPerYear,
   workingDaysPerYear,
+  robotsNeeded,
   panelHeight = 430,
 }: RoiAnalysisWidgetProps) {
   const { locale } = useRoiLocale();
@@ -61,14 +63,15 @@ function RoiAnalysisWidget({
   const isZh = locale === 'zh-CN';
   const annualSavings = manualCostPerYear - robotLaborCostPerYear;
   const dailySavings = annualSavings / workingDaysPerYear;
+  const totalInvestment = purchasePrice + annualMaintenanceCost;
   const paybackMonths =
     annualSavings > 0
-      ? ((purchasePrice + annualMaintenanceCost) / annualSavings) * 12
+      ? (totalInvestment / annualSavings) * 12
       : null;
   const firstYearROI =
-    ((annualSavings - purchasePrice - annualMaintenanceCost) /
-      (purchasePrice + annualMaintenanceCost)) *
-    100;
+    totalInvestment > 0
+      ? ((annualSavings - purchasePrice - annualMaintenanceCost) / totalInvestment) * 100
+      : null;
   const fiveYearNetBenefit =
     annualSavings * 5 - purchasePrice - annualMaintenanceCost * 5;
 
@@ -116,6 +119,13 @@ function RoiAnalysisWidget({
       }).format(value),
     [currencyCode, locale]
   );
+  const formatNumber = React.useCallback(
+    (value: number) =>
+      new Intl.NumberFormat(locale, {
+        maximumFractionDigits: 0,
+      }).format(value),
+    [locale]
+  );
 
   const text = isZh
     ? {
@@ -124,6 +134,7 @@ function RoiAnalysisWidget({
         annualSavings: '年节省',
         paybackPeriod: '回本周期（月）',
         firstYearRoi: '首年 ROI',
+        robotsNeeded: '所需机器人数量',
         fiveYearNetBenefit: '5 年净收益',
         monthAxis: '月份',
         monthLabel: '月份',
@@ -137,6 +148,7 @@ function RoiAnalysisWidget({
         annualSavings: 'Annual Savings',
         paybackPeriod: 'Payback Period (Months)',
         firstYearRoi: 'First-Year ROI',
+        robotsNeeded: '# of Robots Needed',
         fiveYearNetBenefit: '5-Year Net Benefit',
         monthAxis: 'Month',
         monthLabel: 'Month',
@@ -160,7 +172,11 @@ function RoiAnalysisWidget({
     },
     {
       label: text.firstYearRoi,
-      value: `${firstYearROI.toFixed(2)}%`,
+      value: firstYearROI === null ? text.na : `${firstYearROI.toFixed(2)}%`,
+    },
+    {
+      label: text.robotsNeeded,
+      value: formatNumber(robotsNeeded),
     },
     {
       label: text.fiveYearNetBenefit,

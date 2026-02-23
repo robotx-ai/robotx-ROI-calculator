@@ -6,7 +6,7 @@ import React from 'react';
 type RoiMetricCardProps = {
   bgColor: string;
   value: React.ReactNode;
-  label: string;
+  label?: string;
   Icon: React.ComponentType<SvgIconProps>;
   onClick?: () => void;
   fullHeight?: boolean;
@@ -78,9 +78,11 @@ const RoiMetricCard = ({
             ) : (
               value
             )}
-            <Typography color={'common.white'} variant={'h6'} mb={0}>
-              {label}
-            </Typography>
+            {label ? (
+              <Typography color={'common.white'} variant={'h6'} mb={0}>
+                {label}
+              </Typography>
+            ) : null}
           </Div>
         </Div>
       </JumboCard>

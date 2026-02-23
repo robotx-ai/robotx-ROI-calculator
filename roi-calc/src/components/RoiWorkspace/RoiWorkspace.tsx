@@ -1,5 +1,9 @@
 'use client';
 import { LaborCostWidget } from '@/components/LaborCostWidget';
+import type {
+  LaborCostChangePayload,
+  RobotsNeededChangePayload,
+} from '@/components/LaborCostWidget/LaborCostWidget';
 import { RoiLanguageSwitcher } from '@/components/RoiLocale';
 import { RobotMaintenanceCostWidget } from '@/components/RobotMaintenanceCostWidget';
 import { RobotMetricsPanel } from '@/components/RobotMetricsPanel';
@@ -40,20 +44,57 @@ const DEFAULT_CLEANING_FREQ_PER_MONTH = 10;
 const DEFAULT_ROBOT_LABOR_HOURS = 1;
 const DEFAULT_HOURLY_WAGE = 25;
 const DEFAULT_WORKING_DAYS = 250;
+const DEFAULT_CLEANING_AREA_SQFT = 10000;
+const OPERATING_HOURS_PER_DAY = 8;
 const BOTTOM_PANEL_HEIGHT = 430;
 
 function RoiWorkspace({ modelData, priceData }: RoiWorkspaceProps) {
+  const defaultRequiredAreaPerDaySqft = DEFAULT_CLEANING_AREA_SQFT;
+  const defaultRobotCapacityPerDaySqft =
+    modelData.robot_cleaning_rate_sqft_per_hour * OPERATING_HOURS_PER_DAY;
+  const defaultRobotsNeeded =
+    defaultRequiredAreaPerDaySqft <= 0 || defaultRobotCapacityPerDaySqft <= 0
+      ? 0
+      : Math.ceil(defaultRequiredAreaPerDaySqft / defaultRobotCapacityPerDaySqft);
+
   const [manualCostPerYear, setManualCostPerYear] = React.useState(
     priceData.price_per_hour.average_range.min *
       DEFAULT_HOUR_PER_DAY *
       DEFAULT_CLEANING_FREQ_PER_MONTH *
       12
   );
-  const [robotLaborCostPerYear, setRobotLaborCostPerYear] = React.useState(
+  const [perRobotLaborCostPerYear, setPerRobotLaborCostPerYear] = React.useState(
     DEFAULT_ROBOT_LABOR_HOURS * DEFAULT_HOURLY_WAGE * DEFAULT_WORKING_DAYS
   );
+  const [robotsNeeded, setRobotsNeeded] = React.useState(defaultRobotsNeeded);
   const [workingDaysPerYear, setWorkingDaysPerYear] =
     React.useState(DEFAULT_WORKING_DAYS);
+  const fleetPurchasePrice = React.useMemo(
+    () => modelData.robot_msrp_usd * robotsNeeded,
+    [modelData.robot_msrp_usd, robotsNeeded]
+  );
+  const fleetMaintenancePerYear = React.useMemo(
+    () => modelData.maintenance_cost_per_year_usd * robotsNeeded,
+    [modelData.maintenance_cost_per_year_usd, robotsNeeded]
+  );
+  const fleetRobotLaborCostPerYear = React.useMemo(
+    () => perRobotLaborCostPerYear * robotsNeeded,
+    [perRobotLaborCostPerYear, robotsNeeded]
+  );
+
+  const handleManualCostChange = React.useCallback(
+    ({ costPerYear }: LaborCostChangePayload) => {
+      setManualCostPerYear(costPerYear);
+    },
+    []
+  );
+
+  const handleRobotsNeededChange = React.useCallback(
+    ({ robotsNeeded: nextRobotsNeeded }: RobotsNeededChangePayload) => {
+      setRobotsNeeded(nextRobotsNeeded);
+    },
+    []
+  );
 
   return (
     <Box
@@ -91,13 +132,15 @@ function RoiWorkspace({ modelData, priceData }: RoiWorkspaceProps) {
         }}
       >
         <Box sx={{ width: '100%' }}>
-          <RobotMetricsPanel modelData={modelData} />
+          <RobotMetricsPanel modelData={modelData} robotsNeeded={robotsNeeded} />
         </Box>
 
         <Box sx={{ width: '100%' }}>
           <LaborCostWidget
             priceData={priceData}
-            onCostPerYearChange={setManualCostPerYear}
+            robotCleaningRateSqftPerHour={modelData.robot_cleaning_rate_sqft_per_hour}
+            onCostPerYearChange={handleManualCostChange}
+            onRobotsNeededChange={handleRobotsNeededChange}
           />
         </Box>
 
@@ -105,7 +148,7 @@ function RoiWorkspace({ modelData, priceData }: RoiWorkspaceProps) {
           <RobotMaintenanceCostWidget
             panelHeight={BOTTOM_PANEL_HEIGHT}
             onChange={({ costPerYear, workingDays }) => {
-              setRobotLaborCostPerYear(costPerYear);
+              setPerRobotLaborCostPerYear(costPerYear);
               setWorkingDaysPerYear(workingDays);
             }}
           />
@@ -114,11 +157,12 @@ function RoiWorkspace({ modelData, priceData }: RoiWorkspaceProps) {
         <Box sx={{ width: '100%' }}>
           <RoiAnalysisWidget
             panelHeight={BOTTOM_PANEL_HEIGHT}
-            purchasePrice={modelData.robot_msrp_usd}
-            annualMaintenanceCost={modelData.maintenance_cost_per_year_usd}
+            purchasePrice={fleetPurchasePrice}
+            annualMaintenanceCost={fleetMaintenancePerYear}
             manualCostPerYear={manualCostPerYear}
-            robotLaborCostPerYear={robotLaborCostPerYear}
+            robotLaborCostPerYear={fleetRobotLaborCostPerYear}
             workingDaysPerYear={workingDaysPerYear}
+            robotsNeeded={robotsNeeded}
           />
         </Box>
       </Box>

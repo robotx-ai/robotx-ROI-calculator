@@ -7,6 +7,7 @@ import React from 'react';
 
 interface RobotMaintenanceCostWidgetProps {
   onChange?: (payload: {
+    laborMinutesPerDay: number;
     laborHoursPerDay: number;
     hourlyWage: number;
     workingDays: number;
@@ -22,20 +23,22 @@ function RobotMaintenanceCostWidget({
   const { locale } = useRoiLocale();
   const { currencyUnit } = useRoiUnits();
   const isZh = locale === 'zh-CN';
-  const [laborHoursPerDay, setLaborHoursPerDay] = React.useState(1);
+  const [laborMinutesPerDay, setLaborMinutesPerDay] = React.useState(60);
   const [hourlyWage, setHourlyWage] = React.useState(25);
   const [workingDays, setWorkingDays] = React.useState(250);
+  const laborHoursPerDay = laborMinutesPerDay / 60;
 
   const costPerYear = laborHoursPerDay * hourlyWage * workingDays;
 
   React.useEffect(() => {
     onChange?.({
+      laborMinutesPerDay,
       laborHoursPerDay,
       hourlyWage,
       workingDays,
       costPerYear,
     });
-  }, [costPerYear, hourlyWage, laborHoursPerDay, onChange, workingDays]);
+  }, [costPerYear, hourlyWage, laborHoursPerDay, laborMinutesPerDay, onChange, workingDays]);
 
   const currencyCode = currencyUnit === 'USD' ? 'USD' : 'CNY';
 
@@ -48,20 +51,34 @@ function RobotMaintenanceCostWidget({
       }).format(value),
     [currencyCode, locale]
   );
+  const formatLaborTime = React.useCallback(
+    (minutes: number) => {
+      if (isZh) {
+        if (minutes % 60 === 0) return `${minutes / 60} 小时`;
+        return `${minutes} 分钟`;
+      }
+      if (minutes % 60 === 0) {
+        const hours = minutes / 60;
+        return `${hours} ${hours === 1 ? 'hour' : 'hours'}`;
+      }
+      return `${minutes} min`;
+    },
+    [isZh]
+  );
 
   const displayHourlyWage = convertFromUsd(hourlyWage, currencyUnit);
 
   const text = isZh
     ? {
         title: '机器人维护成本',
-        laborRequired: '所需人工（小时/天）',
+        laborRequired: '所需人工（分钟/天）',
         hourlyWage: `时薪（${currencyUnit}/小时）`,
         annualWorkingDays: '年工作天数（天/年）',
         costPerYear: '年成本',
       }
     : {
         title: 'Robot Maintenance Cost',
-        laborRequired: 'Labor Required (hours/day)',
+        laborRequired: 'Labor Required (minutes/day)',
         hourlyWage: `Hourly Wage (${currencyUnit}/hour)`,
         annualWorkingDays: 'Annual Working Days (day/year)',
         costPerYear: 'Cost / Year',
@@ -80,15 +97,15 @@ function RobotMaintenanceCostWidget({
       <Box sx={{ p: 3, flex: 1, overflowY: 'auto', display: 'grid', gap: 2.5 }}>
         <Box>
           <Typography variant='body2' mb={1}>
-            {text.laborRequired}: {laborHoursPerDay}
+            {text.laborRequired}: {formatLaborTime(laborMinutesPerDay)}
           </Typography>
           <Slider
-            value={laborHoursPerDay}
-            min={1}
-            max={5}
-            step={1}
+            value={laborMinutesPerDay}
+            min={30}
+            max={120}
+            step={5}
             onChange={(event, nextValue) =>
-              setLaborHoursPerDay(Array.isArray(nextValue) ? nextValue[0] : nextValue)
+              setLaborMinutesPerDay(Array.isArray(nextValue) ? nextValue[0] : nextValue)
             }
           />
         </Box>
@@ -125,8 +142,14 @@ function RobotMaintenanceCostWidget({
       </Box>
 
       <Divider />
-      <CardActions sx={{ py: (theme) => theme.spacing(1.5), px: 3 }}>
-        <Typography variant='body2' fontWeight={600}>
+      <CardActions
+        sx={{
+          py: (theme) => theme.spacing(1.5),
+          px: 3,
+          bgcolor: '#3a3f4b',
+        }}
+      >
+        <Typography variant='body2' fontWeight={600} color='common.white'>
           {text.costPerYear}: {formatCurrency(convertFromUsd(costPerYear, currencyUnit))}
         </Typography>
       </CardActions>

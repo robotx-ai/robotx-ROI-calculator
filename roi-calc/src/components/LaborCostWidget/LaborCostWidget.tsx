@@ -11,15 +11,18 @@ import {
   useRoiUnits,
 } from '@/components/RoiUnits';
 import { TabContext, TabList, TabPanel } from '@mui/lab';
+import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 import {
   Box,
   CardActions,
   Divider,
+  IconButton,
   InputAdornment,
   MenuItem,
   Slider,
   Tab,
   TextField,
+  Tooltip,
   Typography,
 } from '@mui/material';
 import React from 'react';
@@ -39,22 +42,48 @@ type PriceData = {
 };
 
 type CustomFrequencyUnit = 'week' | 'month' | 'year';
+export type ManualCostTab = 'area' | 'hourly' | 'custom';
+
+export type LaborCostChangePayload = {
+  costPerYear: number;
+  tabValue: ManualCostTab;
+  areaInputs?: {
+    cleaningAreaSqft: number;
+    frequencyPerMonth: number;
+  };
+};
+
+export type RobotsNeededChangePayload = {
+  robotsNeeded: number;
+  requiredAreaPerDaySqft: number;
+  robotCapacityPerDaySqft: number;
+};
+
+const OPERATING_HOURS_PER_DAY = 8;
 
 interface LaborCostWidgetProps {
   priceData: PriceData;
-  onCostPerYearChange?: (value: number) => void;
+  robotCleaningRateSqftPerHour: number;
+  onCostPerYearChange?: (payload: LaborCostChangePayload) => void;
+  onRobotsNeededChange?: (payload: RobotsNeededChangePayload) => void;
 }
 
-function LaborCostWidget({ priceData, onCostPerYearChange }: LaborCostWidgetProps) {
+function LaborCostWidget({
+  priceData,
+  robotCleaningRateSqftPerHour,
+  onCostPerYearChange,
+  onRobotsNeededChange,
+}: LaborCostWidgetProps) {
   const { locale } = useRoiLocale();
   const { currencyUnit, areaUnit } = useRoiUnits();
   const isZh = locale === 'zh-CN';
-  const [tabValue, setTabValue] = React.useState('area');
+  const [tabValue, setTabValue] = React.useState<ManualCostTab>('area');
 
   const [hourlyCost, setHourlyCost] = React.useState(
     priceData.price_per_hour.average_range.min
   );
   const [hourPerDay, setHourPerDay] = React.useState(7);
+  const [workerCount, setWorkerCount] = React.useState(2);
   const [hourlyFrequencyPerMonth, setHourlyFrequencyPerMonth] =
     React.useState(10);
 
@@ -70,7 +99,7 @@ function LaborCostWidget({ priceData, onCostPerYearChange }: LaborCostWidgetProp
     React.useState<CustomFrequencyUnit>('month');
 
   const hourlyCostPerYear =
-    hourlyCost * hourPerDay * hourlyFrequencyPerMonth * 12;
+    hourlyCost * hourPerDay * hourlyFrequencyPerMonth * workerCount * 12;
   const areaCostPerYear = areaCost * cleaningArea * areaFrequencyPerMonth * 12;
   const customMultiplierByUnit = {
     week: 52,
@@ -81,6 +110,13 @@ function LaborCostWidget({ priceData, onCostPerYearChange }: LaborCostWidgetProp
     customCostPerVisit *
     customFrequency *
     customMultiplierByUnit[customFrequencyUnit];
+  const requiredAreaPerDaySqft = cleaningArea;
+  const robotCapacityPerDaySqft =
+    robotCleaningRateSqftPerHour * OPERATING_HOURS_PER_DAY;
+  const robotsNeeded =
+    requiredAreaPerDaySqft <= 0 || robotCapacityPerDaySqft <= 0
+      ? 0
+      : Math.ceil(requiredAreaPerDaySqft / robotCapacityPerDaySqft);
 
   const activeCostPerYear =
     tabValue === 'hourly'
@@ -90,8 +126,41 @@ function LaborCostWidget({ priceData, onCostPerYearChange }: LaborCostWidgetProp
         : customCostPerYear;
 
   React.useEffect(() => {
-    onCostPerYearChange?.(activeCostPerYear);
-  }, [activeCostPerYear, onCostPerYearChange]);
+    onCostPerYearChange?.({
+      costPerYear: activeCostPerYear,
+      tabValue,
+      areaInputs:
+        tabValue === 'area'
+          ? {
+              cleaningAreaSqft: cleaningArea,
+              frequencyPerMonth: areaFrequencyPerMonth,
+            }
+          : undefined,
+    });
+  }, [activeCostPerYear, areaFrequencyPerMonth, cleaningArea, onCostPerYearChange, tabValue]);
+
+  React.useEffect(() => {
+    if (tabValue === 'area') {
+      onRobotsNeededChange?.({
+        robotsNeeded,
+        requiredAreaPerDaySqft,
+        robotCapacityPerDaySqft,
+      });
+      return;
+    }
+
+    onRobotsNeededChange?.({
+      robotsNeeded: 1,
+      requiredAreaPerDaySqft: 0,
+      robotCapacityPerDaySqft,
+    });
+  }, [
+    onRobotsNeededChange,
+    requiredAreaPerDaySqft,
+    robotCapacityPerDaySqft,
+    robotsNeeded,
+    tabValue,
+  ]);
 
   const currencyCode = currencyUnit === 'USD' ? 'USD' : 'CNY';
 
@@ -148,7 +217,10 @@ function LaborCostWidget({ priceData, onCostPerYearChange }: LaborCostWidgetProp
         range: '范围',
         hourPerDay: '每天工时',
         hourUnit: '小时',
+        workerCount: '工人数量',
         cleaningFrequencyPerMonth: '每月清洁频次',
+        hourlyCostInfo:
+          '商业地面清洁通常每位工人每小时成本在 $30 到 $75 之间，全国常见平均值约为 $39/小时。对于较大、开阔的仓库空间，通常按清洁面积（平方英尺）计价，而不是按小时计价。',
         areaCost: '面积成本',
         perSqft: `/ ${areaUnitLabelZh}`,
         cleaningArea: `清洁面积（${areaUnitLabelZh}）`,
@@ -170,7 +242,10 @@ function LaborCostWidget({ priceData, onCostPerYearChange }: LaborCostWidgetProp
         range: 'Range',
         hourPerDay: 'Hour per day',
         hourUnit: 'Hr',
+        workerCount: 'Worker count',
         cleaningFrequencyPerMonth: 'Cleaning frequency / month',
+        hourlyCostInfo:
+          'Commercial floor cleaning generally costs between $30 and $75 per hour per worker, with a common national average around $39 per hour. For larger, open-space warehouses, cleaning is often priced by square footage rather than hourly.',
         areaCost: 'Area Cost',
         perSqft: `/ ${areaUnitLabel}`,
         cleaningArea: `Cleaning Area (${areaUnitLabel})`,
@@ -208,10 +283,21 @@ function LaborCostWidget({ priceData, onCostPerYearChange }: LaborCostWidgetProp
             <TabPanel value='hourly' sx={{ p: 3, height: '100%', overflowY: 'auto' }}>
               <Box sx={{ display: 'grid', gap: 2.5 }}>
                 <Box>
-                  <Typography variant='body2' mb={1}>
-                    {text.hourlyCost}: {formatLocalizedCurrency(displayHourlyCost)}{' '}
-                    {text.perHour}
-                  </Typography>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mb: 1 }}>
+                    <Typography variant='body2'>
+                      {text.hourlyCost}: {formatLocalizedCurrency(displayHourlyCost)}{' '}
+                      {text.perHour}
+                    </Typography>
+                    <Tooltip title={text.hourlyCostInfo} arrow>
+                      <IconButton
+                        size='small'
+                        aria-label='Hourly cost information'
+                        sx={{ color: 'text.secondary', p: 0.25 }}
+                      >
+                        <InfoOutlinedIcon fontSize='small' />
+                      </IconButton>
+                    </Tooltip>
+                  </Box>
                   <Slider
                     value={displayHourlyCost}
                     min={convertFromUsd(priceData.price_per_hour.lowest, currencyUnit)}
@@ -226,16 +312,6 @@ function LaborCostWidget({ priceData, onCostPerYearChange }: LaborCostWidgetProp
                       )
                     }
                   />
-                  <Typography variant='caption' color='text.secondary'>
-                    {text.range}:{' '}
-                    {formatLocalizedCurrency(
-                      convertFromUsd(priceData.price_per_hour.lowest, currencyUnit)
-                    )}{' '}
-                    -{' '}
-                    {formatLocalizedCurrency(
-                      convertFromUsd(priceData.price_per_hour.highest, currencyUnit)
-                    )}
-                  </Typography>
                 </Box>
                 <Box>
                   <Typography variant='body2' mb={1}>
@@ -248,6 +324,20 @@ function LaborCostWidget({ priceData, onCostPerYearChange }: LaborCostWidgetProp
                     step={1}
                     onChange={(event, nextValue) =>
                       setHourPerDay(Array.isArray(nextValue) ? nextValue[0] : nextValue)
+                    }
+                  />
+                </Box>
+                <Box>
+                  <Typography variant='body2' mb={1}>
+                    {text.workerCount}: {workerCount}
+                  </Typography>
+                  <Slider
+                    value={workerCount}
+                    min={1}
+                    max={10}
+                    step={1}
+                    onChange={(event, nextValue) =>
+                      setWorkerCount(Array.isArray(nextValue) ? nextValue[0] : nextValue)
                     }
                   />
                 </Box>
@@ -447,8 +537,14 @@ function LaborCostWidget({ priceData, onCostPerYearChange }: LaborCostWidgetProp
       </TabContext>
 
       <Divider />
-      <CardActions sx={{ py: (theme) => theme.spacing(1.5), px: 3 }}>
-        <Typography variant='body2' fontWeight={600}>
+      <CardActions
+        sx={{
+          py: (theme) => theme.spacing(1.5),
+          px: 3,
+          bgcolor: '#3a3f4b',
+        }}
+      >
+        <Typography variant='body2' fontWeight={600} color='common.white'>
           {text.costPerYear}:{' '}
           {formatLocalizedCurrency(convertFromUsd(activeCostPerYear, currencyUnit))}
         </Typography>
